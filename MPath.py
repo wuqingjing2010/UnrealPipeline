@@ -6,8 +6,8 @@ import os
 
 class MPath(str):
     def __init__(self, path):
-        super(MPath, self).__init__(path)
-        self._path = path.replace('\\', '/')
+        # super(MPath, self).__init__(path)
+        self._path = str(path).replace('\\', '/')
         self.init_path()
 
     def init_path(self):
@@ -38,7 +38,7 @@ class MPath(str):
         else:
             self._stem = ''
 
-        self.base_name = self.file_name.split('.')[0]
+        self.base_name = self.file_name.split('.')[0] if self.is_file else self.file_name
 
     @property
     def parent(self):
@@ -62,15 +62,17 @@ class MPath(str):
     def exists(self):
         return self._exists
 
+    @property
     def isFile(self):
         return self.is_file
 
+    @property
     def isFolder(self):
         return self.is_folder
 
     def listdir(self):
         if self._exists:
-            return [MPath(f) for f in os.listdir(self._path)]
+            return [MPath(self._path+'/'+f) for f in os.listdir(self._path)]
         else:
             return []
 
