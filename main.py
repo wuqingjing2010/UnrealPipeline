@@ -33,35 +33,16 @@ lUtil = unreal.EditorLevelLibrary()
 
 def mainTest():
     import importlib,os
-    # unreal.EditorUtilityLibrary.get_selected_assets()
-    # nd = eUtil.get_selected_assets()[0]
-
-    # sel = unreal.AssetData('/Game/codeTest/NewAjaMediaOutput.NewAjaMediaOutput')
-    # nd = aUtil.load_asset('/Game/codeTest/tttt.tttt')
-
-    # listMethod(sel)
-
-    # import MPath as MPath
-    # importlib.reload(MPath)
-
-    # mp = MPath.MPath(sel)
-    # print(mp.parent.child('test'))
-    # for f in mp.listdir():
-    #     print(f.base_name)
-    #
-
-    import unrealUntil as uutil,importlib
+    import unrealUntil as uutil
+    from MPath import MPath
     importlib.reload(uutil)
-    sel = uutil.ls(outliner=False,sl=True)[0]
-    print(sel.node_type)
-    print(sel.node_path)
-    print(sel.node_directory)
-    parent_node = sel.parent
-    fd = parent_node.node.makedir('wqj')
-    # TODO 这里需要排查 改名后删除 为什么 node_path 还是之前名称，是不是因为该原因导致删除不掉
-    fd.rename('qqqq')
-    print(fd.node_path)
-    fd.delete()
+    sel = lUtil.get_selected_level_actors()[0]
+    # listMethod(sel[0])
+    print(type(sel))
+
+    # print(sel.get_folder_path()) ## 大纲中的文件夹层级结构
+    # print(sel.get_full_name()) ## level 中的文件层级结构 包括类型名称
+    # print(sel.get_path_name()) ## level 中的文件层级结构
 
 # 获取当前打开得 level
 # lUtil.get_editor_world()

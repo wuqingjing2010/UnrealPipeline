@@ -2,6 +2,9 @@
 # -*- encoding: utf-8 -*-
 import unreal
 from MPath import MPath
+import unrealUntil as uutil
+import importlib
+importlib.reload(uutil)
 e_util = unreal.EditorUtilityLibrary()
 a_util = unreal.EditorAssetLibrary()
 str_util = unreal.StringLibrary()
@@ -16,17 +19,33 @@ class UNode:
 
     def __init__(self, UActor):
         # TODO 需要考虑实例化的时候 方式有哪几类
+        '''
+        初始化该节点 直接将 Actor 传入进来
+        :param UActor:
+        '''
+
         self.node = UActor
         self.node_name = UActor.get_name()
-        self.node_type = UActor.get_class().get_fname()
+        self.node_type = UActor.get_class().get_name()
         self.node_path = UActor.get_path_name()
-        # self.node_asset =
+
+        self._anode = None
         self.vaild = False
         self.hidden = False
         self.hidden_game = False
 
         # self.attribute_list = ['hidden']
 
+        pass
+
+    @property
+    def node_asset(self):
+        '''
+        这里需要实现 从 大纲视图 查找到 contentBrowser中的Asset
+        返回 ANode 类
+        :return:
+        '''
+        return self._anode
         pass
 
     def hidden(self, game=False):
@@ -103,10 +122,12 @@ class UNode:
         return self.node.get_distance_to(actor)
 
 class FolderNode:
-
     def __init__(self,directory_path):
-        self.node_path = MPath(directory_path)
-        self.node_directory = MPath(sys_util.get_project_content_directory()+directory_path.replace('/Game/',''))
+        '''
+        :param directory_path:
+        '''
+        self.node_path = MPath(uutil.convertSysPathToGamePath(directory_path)) if uutil.isSysPath(directory_path) else MPath(directory_path)
+        self.node_directory = MPath()
         if not a_util.does_directory_exist(self.node_path):
             unreal.log_error("Path is not exists.")
 
@@ -231,7 +252,7 @@ class ANode:
             self.name = self.node.get_name()
             if self.node_type == 'folder':
                 self.init_folder()
-            elif self.node_type == 'blueprint':
+            elif self.node_type == 'Blueprint':
                 self.init_blueprint()
             else:
                 self.init_asset()
@@ -298,7 +319,7 @@ class ANode:
         if self.vaild:
             ## 将当前 node 添加到场景
             if self.node_type != 'folder':
-                if self.node_type == "blueprint":
+                if self.node_type == "Blueprint":
                     actor = l_util.spawn_actor_from_class(self.node, location, rotation)
                 else:
                     actor = l_util.spawn_actor_from_object(self.node, location, rotation)
@@ -309,10 +330,12 @@ class ANode:
     def rename(self,newname):
         if self.node_type != 'folder':
             a_util.rename_asset(self.node_path,self.node_path.parent.child(newname))
-            self.node_path = self.node_path.parent.child(newname)
-
+            self.node_path = MPath(self.node.get_path_name())
+            self.node_directory = MPath(sys_util.get_system_path(self.node))
         else:
             self.node.rename(newname)
+            self.node_path = self.node.node_path
+            self.node_directory = self.node.node_directory
 
 
     def copy(self, des_path):
