@@ -206,10 +206,11 @@ class ImageNode():
         :param direction: 默认为 横向， direction 给False 指定纵向
         :return:
         """
+        images = tuple([data.image_data for data in image_dataes])
         if direction:
-            res = np.hstack((data.image_data for data in image_dataes))
+            res = np.hstack(images)
         else:
-            res = np.vstack((data.image_data for data in image_dataes))
+            res = np.vstack(images)
         return ImageData(res)
 
 
