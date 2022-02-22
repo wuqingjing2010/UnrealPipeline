@@ -31,8 +31,8 @@ class ImageData():
 
     def __init__(self, image_node):
         self.image_data = image_node
-        self._height,self._width,self.channel = self.image_data.shape
-        self._center = ((self._width-1)/2,(self._height-1)/2)
+        self._height, self._width, self.channel = self.image_data.shape
+        self._center = ((self._width - 1) / 2, (self._height - 1) / 2)
         self.source_data = image_node
 
     def changing_color_space(self, convert_space_mode):
@@ -54,7 +54,6 @@ class ImageData():
     @property
     def center(self):
         return self._center
-
 
     def show(self, time=2000):
         """
@@ -86,6 +85,65 @@ class ImageNode():
         """
         return ImageData(cv2.threshold(self.image_node, thresh, maxval, threashold_type))
 
+    def erode(self, radius):
+        """
+        形态学操作  腐蚀操作
+        :return:
+        """
+        kernel = np.ones((radius, radius), np.uint8)
+        return ImageData(cv2.erode(self.image_node.image_data, kernel, anchor=(0, 0), iterations=3))
+
+    def dilate(self, radius):
+        kernel = np.ones((radius, radius), np.uint8)
+        return ImageData(cv2.dilate(self.image_node.image_data, kernel, anchor=(-1, -1), iterations=3))
+
+    def morphology(self, operation, radius):
+        """
+        形态学操作
+        :param operation: 操作方式 int 类型
+        :param radius:  卷积核大小
+        :return:
+        """
+        operation_method = [
+            cv2.MORPH_OPEN,  # 0
+            cv2.MORPH_CLOSE,  # 1
+            cv2.MORPH_GRADIENT,  # 2
+            cv2.MORPH_CROSS,  # 3
+            cv2.MORPH_BLACKHAT,  # 4
+            cv2.MORPH_TOPHAT,  # 5
+            cv2.MORPH_RECT,  # 6
+            cv2.MORPH_HITMISS  # 7
+        ]
+        kernel = np.ones((radius, radius), np.uint8)
+        return ImageData(cv2.morphologyEx(self.image_node.image_data, operation_method[operation], kernel))
+
+    def sobel(self,ksize=3):
+        """
+        索贝算子
+        :param ksize:  1 3 5 7 9
+        :return:
+        """
+        x = cv2.Sobel(self.image_node.image_data,-1,1,0,ksize=ksize)
+        y = cv2.Sobel(self.image_node.image_data,-1,0,1,ksize=ksize)
+        return ImageData(cv2.addWeighted(cv2.convertScaleAbs(x),0.5,cv2.convertScaleAbs(y),0.5,0))
+
+    def Scharr(self):
+        """
+        scharr 算子
+        :param ksize:  1 3 5 7 9
+        :return:
+        """
+        x = cv2.Scharr(self.image_node.image_data,-1,1,0)
+        y = cv2.Scharr(self.image_node.image_data,-1,0,1)
+        return ImageData(cv2.addWeighted(cv2.convertScaleAbs(x),0.5,cv2.convertScaleAbs(y),0.5,0))
+
+    def laplacian(self):
+        """
+        拉普拉斯算子
+        :return:
+        """
+        return ImageData(cv2.convertScaleAbs(cv2.Laplacian(self.image_node.image_data,-1)))
+
     def blur(self, size, blur_type=2, radius=2, border_type=3):
         """
         对当前图像进行模糊操作
@@ -110,23 +168,28 @@ class ImageNode():
                        cv2.BORDER_TRANSPARENT]
 
         if blur_type == 0:
-            self.image_node = cv2.blur(self.image_node, size, borderType=border_list[border_type])
+            res = ImageData(cv2.blur(self.image_node, size, borderType=border_list[border_type]))
         elif blur_type == 1:
-            self.image_node = cv2.medianBlur(self.image_node, size, borderType=border_list[border_type])
+            res = ImageData(cv2.medianBlur(self.image_node, size, borderType=border_list[border_type]))
         else:
-            self.image_node = cv2.GaussianBlur(self.image_node, size, radius, borderType=border_list[border_type])
-        return self.image_node
+            res = ImageData(cv2.GaussianBlur(self.image_node, size, radius, borderType=border_list[border_type]))
+        return res
 
-    # def bilateral_filter(self,):
+    def bilateral_filter(self, ):
+        """
+        双边滤波函数
+        :return:
+        """
+        return ImageData(cv2.bilateralFilter(self.image_node.image_data, 10, 50, 50))
 
-    def pixel_color(self,x,y):
+    def pixel_color(self, x, y):
         '''
         获取像素得颜色
         :return:
         '''
-        return self.image_node.image_data[x,y]
+        return self.image_node.image_data[x, y]
 
-    def set_pixel_color(self,x,y,color):
+    def set_pixel_color(self, x, y, color):
         """
         设置像素颜色
         :param x:
@@ -134,16 +197,39 @@ class ImageNode():
         :param color: <list> BGR 数组
         :return:
         """
-        self.image_node.image_data [x,y] = color
+        self.image_node.image_data[x, y] = color
 
-    def show(self, time=2000):
+    def combin_image_data(self,image_dataes,direction=True):
+        """
+        合并图片数据
+        :param image_dataes: <tuple> ImageData
+        :param direction: 默认为 横向， direction 给False 指定纵向
+        :return:
+        """
+        if direction:
+            res = np.hstack((data.image_data for data in image_dataes))
+        else:
+            res = np.vstack((data.image_data for data in image_dataes))
+        return ImageData(res)
+
+
+
+    def show(self, time=2000, name='img'):
         """
         显示当前得 image
         :return:
         """
-        cv2.imshow('img', self.image_node)
+        cv2.imshow(name, self.image_node.image_data)
         cv2.waitKey(time)
-        cv2.destroyWindow('img')
+        cv2.destroyWindow(name)
+
+    def save(self, path):
+        """
+        保存当前图像到指定地址
+        :param path:
+        :return:
+        """
+        cv2.imwrite(path, self.image_node.image_data)
 
     def resize(self, height, width):
         """
@@ -153,27 +239,26 @@ class ImageNode():
         """
         self.image_node = ImageData(cv2.resize(self.image_node, (width, height), interpolation=cv2.INTER_CUBIC))
 
-    def translation(self,translationX,translationY):
+    def translation(self, translationX, translationY):
         """
         对图像进行平移操作
         :param translationX:
         :param translationY:
         """
         self.image_node = ImageData(cv2.warpAffine(self.image_node,
-                                        np.float32([[1,0,translationX],[0,1,translationY]]),
-                                        (self.height,self.width)
+                                                   np.float32([[1, 0, translationX], [0, 1, translationY]]),
+                                                   (self.height, self.width)
                                                    )
                                     )
 
-
-    def rotation(self,angle,scale=1):
+    def rotation(self, angle, scale=1):
         """
         对图像进行旋转操作
         :param angle: 旋转角度
         :param scale: 缩放值
         :return:
         """
-        self.image_node = ImageData(cv2.getRotationMatrix2D(self.center,angle,scale))
+        self.image_node = ImageData(cv2.getRotationMatrix2D(self.center, angle, scale))
 
     @property
     def height(self):
@@ -189,10 +274,11 @@ class ImageNode():
 
 
 if __name__ == '__main__':
-    file_path = r'C:\Users\Administrator\Desktop\preview2.jpg'
+    # file_path = r'C:\Users\Administrator\Desktop\preview2.jpg'
+    # file_path = r'A:\Users\Administrator\Desktop\bbbaaa.jpg'
+    file_path = r'A:\Users\Administrator\Desktop\624629610785903385.jpg'
     img = ImageNode(file_path)
-    res = cv2.bilateralFilter(img.image_node.image_data, 100, 500, 500)
-    cv2.imshow('res',res)
-    cv2.waitKey(0)
-
+    # img.show(0,'start')
+    img.morphology(2, 2)
+    img.show(0, 'end')
     # listMethod(img.image_node)
