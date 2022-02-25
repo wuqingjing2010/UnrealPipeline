@@ -165,6 +165,17 @@ class ImageNode():
         """
         return cv2.Canny(self.image_data,threshold1,threshold2)
 
+    def contour_detection(self):
+        """
+
+        :return:
+        """
+        cv2.findContours(self.image_data,)
+        cv2.drawContours(self.image_data,)
+
+
+
+
     @property
     def height(self):
         return self._height
@@ -206,8 +217,7 @@ class ImageNode():
             res = np.hstack(images)
         else:
             res = np.vstack(images)
-        return ImageData(res)
-
+        return ImageNode(res)
 
 
     def show(self, time=2000, name='img'):
@@ -269,6 +279,8 @@ class ImageNode():
         return self._center
 
 
+
+
 if __name__ == '__main__':
     file_path = r'C:\Users\Administrator\Desktop\preview2.jpg'
     # file_path = r'A:\Users\Administrator\Desktop\bbbaaa.jpg'
@@ -276,10 +288,10 @@ if __name__ == '__main__':
     img = ImageNode(file_path)
     # img.show(0,'start')
     img.resize(540,960)
-    edge = img.bilateral_filter(50,50,250).canny(240,255)
-
+    # edge = img.bilateral_filter(50,50,250).canny(240,255)
+    img.sobel().show(0)
     # nd.show(0)
     # cnd = nd.canny(240,255)
-    cv2.imshow('tt',edge)
-    cv2.waitKey(0)
-    cv2.destroyWindow('tt')
+    # cv2.imshow('tt',edge)
+    # cv2.waitKey(0)
+    # cv2.destroyWindow('tt')
