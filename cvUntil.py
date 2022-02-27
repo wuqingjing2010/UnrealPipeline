@@ -34,8 +34,11 @@ class ImageNode():
             self.image_data = file
             self.file_type = "ARRAY"
             self.file_path = None
+        self.shape = self.image_data.shape
 
-        self._height, self._width, self.channel = self.image_data.shape
+        self._height = self.shape[0]
+        self._width = self.shape[1]
+
         self._center = ((self._width - 1) / 2, (self._height - 1) / 2)
         self.source_node = self.image_data.copy()
     def changing_color_space(self, convert_space_mode):
@@ -77,7 +80,12 @@ class ImageNode():
             res = ImageNode(cv2.GaussianBlur(self.image_data, size, radius, borderType=border_list[border_type]))
         return res
 
-    def threashold(self, thresh, maxval, threashold_type):
+    def binary_image(self):
+        self.image_gray = cv2.cvtColor(self.image_data, cv2.COLOR_BGR2GRAY)
+        return ImageNode(cv2.threshold(self.image_gray,127,255,0)[1])
+
+
+    def threashold(self, thresh=127, maxval=255, threashold_type=0):
         """
         对该图像进行阈值操作
         :param thresh:  阈值分界点
@@ -90,7 +98,7 @@ class ImageNode():
                         cv.THRESH_TOZERO_INV
         :return:  <ImageData>
         """
-        return ImageNode(cv2.threshold(self.image_data, thresh, maxval, threashold_type))
+        return ImageNode(cv2.threshold(self.image_data, thresh, maxval, threashold_type)[1])
 
     def erode(self, radius):
         """
@@ -165,13 +173,37 @@ class ImageNode():
         """
         return cv2.Canny(self.image_data,threshold1,threshold2)
 
-    def contour_detection(self):
+    def mipmap(self):
+        """
+        对图像进行
+        :return:
+        """
+        pass
+    
+
+
+    def contour_detection(self,index=-1,color=(0,255,0),thinkness=1):
         """
 
         :return:
         """
-        cv2.findContours(self.image_data,)
-        cv2.drawContours(self.image_data,)
+        contours,hierarchy = cv2.findContours(self.binary_image().image_data,
+                                              cv2.RETR_TREE,
+                                              cv2.CHAIN_APPROX_SIMPLE
+                                              )
+        for cnt in contours:
+
+            if cv2.arcLength(cnt,True)< 20:
+                continue
+            # approx = cv2.approxPolyDP(cnt,epsilon,True)
+            x,y,w,h = cv2.boundingRect(cnt)
+            cv2.rectangle(self.image_data,(x,y),(x+w,y+h),color,1)
+        return self
+        # return ImageNode(cv2.drawContours(self.image_data,contours,index,color,thinkness))
+
+    def corner_detection(self,blockSize=3,ksize=3,k=0.001):
+
+        return ImageNode(cv2.cornerHarris(np.float32(self.binary_image().image_data),blockSize,ksize,k)).dilate(10)
 
 
 
@@ -193,7 +225,7 @@ class ImageNode():
         获取像素得颜色
         :return:
         '''
-        return self.image_node.image_data[x, y]
+        return self.image_data[x, y]
 
     def set_pixel_color(self, x, y, color):
         """
@@ -203,7 +235,7 @@ class ImageNode():
         :param color: <list> BGR 数组
         :return:
         """
-        self.image_node.image_data[x, y] = color
+        self.image_data[x, y] = color
 
     def combin_image_data(self,image_nodes,direction=True):
         """
@@ -266,30 +298,21 @@ class ImageNode():
         """
         self.image_data = cv2.getRotationMatrix2D(self.center, angle, scale)
 
-    @property
-    def height(self):
-        return self._height
-
-    @property
-    def width(self):
-        return self._width
-
-    @property
-    def center(self):
-        return self._center
-
 
 
 
 if __name__ == '__main__':
-    file_path = r'C:\Users\Administrator\Desktop\preview2.jpg'
-    # file_path = r'A:\Users\Administrator\Desktop\bbbaaa.jpg'
+    # file_path = r'C:\Users\Administrator\Desktop\preview2.jpg'
+    # file_path = r'A:\Users\Administrator\Desktop\bg2017121301.jpg'
+    file_path = r'A:\Users\Administrator\Desktop\65cd01d83da55cfdabca7969c4ccb79b.jpg'
     # file_path = r'A:\Users\Administrator\Desktop\624629610785903385.jpg'
     img = ImageNode(file_path)
+    # img.threashold()
+    img.corner_detection().show(0)
     # img.show(0,'start')
-    img.resize(540,960)
+    # img.resize(540,960)
     # edge = img.bilateral_filter(50,50,250).canny(240,255)
-    img.sobel().show(0)
+    # img.sobel()
     # nd.show(0)
     # cnd = nd.canny(240,255)
     # cv2.imshow('tt',edge)
