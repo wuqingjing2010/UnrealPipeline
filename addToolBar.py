@@ -1,16 +1,22 @@
+#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+
 import unreal
 from collections import namedtuple
 
-def make_menu(lable_name,command_string):
+
+
+
+def make_menu(label_name,command_string):
     """
     创建menu菜单目录
-    :param lable_name:
+    :param label_name:
     :param command_string:
     :return:
     """
     # menu_stru = namedtuple("menu_name",["entry","commond_string"])
     entry = unreal.ToolMenuEntry(type=unreal.MultiBlockType.TOOL_BAR_BUTTON)
-    entry.set_label(lable_name)
+    entry.set_label(label_name)
     typ = unreal.ToolMenuStringCommandType.PYTHON
     entry.set_string_command(typ,'',command_string)
     return entry

@@ -1,23 +1,37 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
-# import unreal
+import unreal
 # import unreal_until as util
+#
+def cout(obj):
+    unreal.log(obj)
 
-# def cout(obj):
-#     unreal.log(obj)
+def listMethod(nd, r_name='', show_help=False):
+    print("current object type {}".format(type(nd)))
+    for i in dir(nd):
+        if r_name:
+            if r_name.lower() in i.lower():
+                print(i)
+                if show_help:
+                    help(getattr(nd, i))
+            continue
+        print(i)
+        if show_help:
+            help(getattr(nd, i))
 
 
 
-# e_util = unreal.EditorUtilityLibrary()
-# a_util = unreal.EditorAssetLibrary()
-# str_util = unreal.StringLibrary()
-# sys_util = unreal.SystemLibrary()
-# l_util = unreal.EditorLevelLibrary()
+eUtil = unreal.EditorUtilityLibrary()
+aUtil = unreal.EditorAssetLibrary()
+strUtil = unreal.StringLibrary()
+sysUtil = unreal.SystemLibrary()
+lUtil = unreal.EditorLevelLibrary()
 
 
-# menus = unreal.ToolMenus.get()
-# main_menu = menus.find_menu("LevelEditor.MainMenu")
+
+
+
 
 
 # 用于获取 content browser 中的选择对象
@@ -45,45 +59,3 @@
 #     cout(cls.get_name())
 #
 #
-
-import socket
-
-localIP = "127.0.0.1"
-
-localPort = 6308
-
-bufferSize = 11
-
-msgFromServer = "Hello UDP Client"
-
-bytesToSend = str.encode(msgFromServer)
-
-# Create a datagram socket
-
-UDPServerSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-
-# Bind to address and ip
-
-UDPServerSocket.bind((localIP, localPort))
-
-print("UDP server up and listening")
-
-# Listen for incoming datagrams
-
-while (True):
-    print('rev')
-    bytesAddressPair = UDPServerSocket.recvfrom(bufferSize)
-
-    message = bytesAddressPair[0]
-
-    address = bytesAddressPair[1]
-
-    clientMsg = "Message from Client:{}".format(message)
-    clientIP = "Client IP Address:{}".format(address)
-
-    print(clientMsg)
-    print(clientIP)
-
-    # Sending a reply to client
-
-    UDPServerSocket.sendto(bytesToSend, address)
