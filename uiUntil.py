@@ -2,7 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import unreal
-
+print('uiUntil file exec!!!')
 menus =  unreal.ToolMenus.get()
 rootMenuName = 'LevelEditor.MainMenu'
 rootToolBarName = "LevelEditor.LevelEditorToolBar"
@@ -73,3 +73,13 @@ def addToolShelf(toolName,string_commond):
     section_name = 'Settings'
     menu.add_menu_entry(section_name, entry)
     menus.refresh_all_widgets()
+
+
+def addIqiyiUI():
+    addMainMenu('IQIYI', 'IQIYI')
+    #TODO 后续添加其他工具、子菜单、或者按钮
+    addSubMenu('IQIYI','mainTest','import main as main,importlib\nimportlib.reload(main)\nmain.mainTest()')
+
+
+
+

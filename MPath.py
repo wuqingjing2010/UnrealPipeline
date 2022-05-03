@@ -39,6 +39,8 @@ class MPath(str):
         else:
             self._stem = ''
 
+        self.base_name = self.file_name.split('.')[0] if self.is_file else self.file_name
+
     @property
     def parent(self):
         return MPath(self._parent)
@@ -251,6 +253,7 @@ class MPath(str):
             return f_size
 
     def __deepcopy__(self, memo):
+        print('deepcopy')
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result

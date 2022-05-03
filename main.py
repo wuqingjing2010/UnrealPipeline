@@ -4,6 +4,7 @@
 import unreal
 # import unreal_until as util
 #
+
 def cout(obj):
     unreal.log(obj)
 
@@ -30,12 +31,28 @@ lUtil = unreal.EditorLevelLibrary()
 
 
 
+def mainTest():
+    import importlib,os
+    import unrealUntil as uutil
+    from MPath import MPath
+    importlib.reload(uutil)
+    sel = lUtil.get_selected_level_actors()[0]
+    # listMethod(sel[0])
+    print(type(sel))
 
+    # print(sel.get_folder_path()) ## 大纲中的文件夹层级结构
+    # print(sel.get_full_name()) ## level 中的文件层级结构 包括类型名称
+    # print(sel.get_path_name()) ## level 中的文件层级结构
 
-
+# 获取当前打开得 level
+# lUtil.get_editor_world()
 
 # 用于获取 content browser 中的选择对象
-# print(unreal.EditorUtilityLibrary.get_selected_assets())
+# eUtil.get_selected_assets()   # 目前发现 folder 没法获取选中
+
+# 用于获取 world outline 中的选择对象
+# lUtil.get_selected_level_actors() # 目前发现 大纲中 的folder 无法判断是否选中
+
 
 
 # sel = unreal.EditorLevelLibrary.get_selected_level_actors()[0]
