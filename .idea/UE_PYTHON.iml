@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="PYTHON_MODULE" version="4">
   <component name="NewModuleRootManager">
+    <content url="file://A:/Program Files/Epic Games/UE_5.0/Engine/Plugins/Experimental/PythonScriptPlugin/Content/Python" />
     <content url="file://C:/work/unreal/unreal_learning/buildPlugin/Intermediate/PythonStub" />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <content url="file://$MODULE_DIR$/../unrealTest/UnrealPythonLibrary/UnrealProject/UnrealPythonLibrary/Plugins/UnrealPythonLibraryPlugin/Content/Python/PythonLibraries" />
-    <orderEntry type="jdk" jdkName="Python 3.6" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.7 (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
