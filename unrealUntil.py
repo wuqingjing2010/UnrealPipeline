@@ -4,8 +4,9 @@ import unreal
 from MPath import MPath
 import unrealLib as ulib
 import importlib
-
 importlib.reload(ulib)
+ANode = ulib.ANode
+UNode = ulib.UNode
 
 e_util = unreal.EditorUtilityLibrary()
 a_util = unreal.EditorAssetLibrary()
@@ -14,7 +15,7 @@ sys_util = unreal.SystemLibrary()
 l_util = unreal.EditorLevelLibrary()
 
 
-def show_message(message, level='log', window=False):
+def show_message(message, level='log'):
     '''
     显示消息的方式 默认两种方式 第一种 在outlog 中打印log 其中logo分三个 级别  对应 log warning error
     第二种方式弹窗的方式 进行显示， 分两种 第一种 只弹确认窗口，第二种弹出 确认与否 窗口 其中 log 方式为 确认窗口，以外为确认与否窗口
@@ -23,7 +24,29 @@ def show_message(message, level='log', window=False):
     :param window: 是否开启窗口告知
     :return:
     '''
-    pass
+    dialog = unreal.EditorDialog()
+    dialog.show_message(level,message,unreal.AppMsgType.OK)
+
+def progress_dialog(func,iter_obj,*args,task_name=None,force_quit=True):
+    """
+    带进度提示的 批量处理
+    :param func:  需要执行的 功能函数
+    :param iter_obj:   迭代对象
+    :param args:   功能函数是否包含需要提供的其他参数
+    :param task_name:  任务名称 默认会显示在 进度窗口 标题栏
+    :param force_quit:  是否可以强制退出
+    :return:
+    """
+    total_task = len(iter_obj)
+    task_name = task_name if task_name else func.__name__
+    with unreal.ScopedSlowTask(total_task,task_name) as slow_task:
+        slow_task.make_dialog(force_quit)
+        for index,obj in enumerate(iter_obj):
+            if force_quit and slow_task.should_cancel():
+                break
+            result = func(obj,*args)
+            slow_task.enter_progress_frame(int(float(index)/float(total_task)),result)
+
 
 
 def ls(outliner=True, sl=False, node_type=''):
@@ -40,7 +63,7 @@ def ls(outliner=True, sl=False, node_type=''):
             # 找到指定类型
             all_sel_obj = selected(outliner=outliner)
             target_type_obs = [obj for obj in all_sel_obj if obj.type == node_type]
-            return target_type_obs if package else [obj.node for obj in target_type_obs]
+            return target_type_obs
         else:
             return selected(outliner=outliner)
 
@@ -50,14 +73,14 @@ def ls(outliner=True, sl=False, node_type=''):
             all_nodes = [UNode(nd) for nd in l_util.get_all_level_actors()]
         else:
             # 获取当前 文件夹下的所有 asset
-            all_nodes = [ulib.ANode(nd) for nd in a_util.list_assets(sys_util.get_project_content_directory())]
+            all_nodes = [ANode(nd) for nd in a_util.list_assets(sys_util.get_project_content_directory())]
         if node_type:
             # 返回场景中所有指定类型的对象
             res_nds = [nd for nd in all_nodes if nd.type == node_type]
-            return res_nds if package else [nd.node for nd in res_nds]
+            return res_nds
         else:
             # 返回场景中所有对象
-            return all_nodes if package else [nd.node for nd in all_nodes]
+            return all_nodes
 
 
 def selected(outliner=True, cl=False):
@@ -75,7 +98,7 @@ def selected(outliner=True, cl=False):
         else:
             return [UNode(nd) for nd in l_util.get_selected_level_actors()]
     else:
-        return [ulib.ANode(nd) for nd in e_util.get_selected_assets()]
+        return [ANode(nd) for nd in e_util.get_selected_assets()]
 
 
 def listDir(source_dir, recursive=True):
